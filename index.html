@@ -1,0 +1,116 @@
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+<script>
+
+    var json_object1, json_object2;
+
+    function ExcelToJSON (event, id) {
+      
+      var file = event.target.files[0];
+      
+      console.log('filename...', file.name)
+
+      var id;
+
+      console.log('id...', id)
+
+            var reader = new FileReader();
+            var excelData = [];
+            reader.onload = function (event) {
+                var data = event.target.result;
+                var workbook = XLSX.read(data, {
+                    type: 'binary'
+                });
+
+                workbook.SheetNames.forEach(function (sheetName) {
+                    // Here is your array object
+                    // var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                    var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+
+                    for (var i = 0; i < XL_row_object.length; i++)
+                    {
+                        excelData.push(XL_row_object[i]["your column name"]);
+                        // excelData.push(XL_row_object[i]);
+                    }
+
+                    if(id != "#xlx_json2") {
+                        // var json_object1 = JSON.stringify(XL_row_object);
+                        json_object1 = XL_row_object;
+                        console.log('json_object... ',json_object1);
+                        console.log('json_object first object', json_object1[1].Name)
+                        json_object1.forEach(function(item){
+                            console.log('inside loop', JSON.stringify(item));
+                            $(id).append("<li>"JSON.stringify(item) "</li>");
+                        })
+                        // $(id).val(JSON.stringify(json_object1))
+
+                    } else {
+                         json_object2 = XL_row_object;
+                        console.log('json_object... ',json_object2);
+                        console.log('json_object first object', json_object2[0].Name)
+                        $(id).val(JSON.stringify(json_object2))
+                    }
+                })
+
+            };
+
+            
+
+            reader.onerror = function (ex) {
+                console.log(ex);
+            };
+
+            reader.readAsBinaryString(file);
+  }
+
+// compareObj(json_object1, json_object2)
+
+function compareObj(e1, e2) {
+    console.log('inside compareObj function...')
+    debugger
+    for (let i = 0; i < e1.length; i++){
+            console.log('json_object first object', JSON.stringify(e1[i]))
+            console.log('json_object second object', JSON.stringify(e1[i]))
+        if (JSON.stringify(e1[i])=== JSON.stringify(e2[i])) {
+            console.log('it is matched!!!') 
+        } else {            
+                console.log('its not matched!!')
+            }
+        }
+}
+
+</script>
+
+<form enctype="multipart/form-data">
+    <input id="upload1" name="files[]" type="file"></input>
+    <input id="upload2" name="files[]" type="file"></input>
+    <button id=compareButton type="button">Compare</button>
+</form>
+<textarea class="form-control" cols="120" id="xlx_json1" rows="35">
+</textarea>
+<textarea class="form-control" cols="120" id="xlx_json2" rows="35">
+</textarea>
+<script>
+    $('#upload1').change(function(event) {
+      console.log('foo')
+      id = "#xlx_json1"
+      console.log('id...', id)
+      ExcelToJSON(event, id)
+    })
+    
+    $('#upload2').change(function(event) {
+      console.log('foo')
+      id = "#xlx_json2"
+      console.log('id...', id)
+      ExcelToJSON(event, id)
+    })
+    
+    $('#compareButton').on('click', function() {
+        
+        compareObj(json_object1, json_object2)
+    })
+    
+
+</script>
